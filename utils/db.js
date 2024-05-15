@@ -2,17 +2,17 @@ import MongoClient from 'mongodb';
 
 class DBClient {
   constructor() {
-    const host = proces.env.DB_HOST || 'localhost';
+    const host = process.env.DB_HOST || 'localhost';
     const port = process.env.DB_PORT || 27017;
     const database = process.env.DB_DATABASE || 'files_manager';
 
     const uri = `mongodb://${host}:${port}`;
-    this.client = new MongoClient(uri, { useUnifiedTopology = true });
+    this.client = new MongoClient(uri, { useUnifiedTopology: true });
     this.dbName = database;
-  }       
-        
+  }
+
   async connect() {
-    try { 
+    try {
       await this.client.connnect();
       await this.client.db(this.dbName);
     } catch (error) {
@@ -31,6 +31,7 @@ class DBClient {
       return count;
     } catch (error) {
       console.error(`Error counting users: ${error}`);
+      throw error;
     }
   }
 
@@ -41,6 +42,7 @@ class DBClient {
       return count;
     } catch (error) {
       console.error(`Errorr counting files: ${error}`);
+      throw error;
     }
   }
 }

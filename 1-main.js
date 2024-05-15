@@ -1,55 +1,30 @@
-const { MongoClient } = require('mongodb');
+import dbClient from './utils/db';
 
-class DBClient {
-    constructor() {
-        const host = process.env.DB_HOST || 'localhost';
-        const port = process.env.DB_PORT || 27017;
-        const database = process.env.DB_DATABASE || 'files_manager';
+const waitConnection = () => {
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        const repeatFct = async () => {
+            await setTimeout(() => {
+                i += 1;
+                if (i >= 10) {
+                    reject()
+                }
+                else if(!dbClient.isAlive()) {
+                    repeatFct()
+                }
+                else {
+                    resolve()
+                }
+            }, 1000);
+        };
+        repeatFct();
+    })
+};
 
-        const url = `mongodb://${host}:${port}`;
-        this.client = new MongoClient(url, { useUnifiedTopology: true });
-        this.dbName = database;
-    }
-
-    async connect() {
-        try {
-            await this.client.connect();
-            console.log('Connected to MongoDB');
-            this.db = this.client.db(this.dbName);
-        } catch (error) {
-            console.error('Error connecting to MongoDB:', error);
-            throw error;
-        }
-    }
-
-    isAlive() {
-        return !!this.client && this.client.isConnected();
-    }
-
-    async nbUsers() {
-        try {
-            const usersCollection = this.db.collection('users');
-            const count = await usersCollection.countDocuments();
-            return count;
-        } catch (error) {
-            console.error('Error counting users:', error);
-            throw error;
-        }
-    }
-
-    async nbFiles() {
-        try {
-            const filesCollection = this.db.collection('files');
-            const count = await filesCollection.countDocuments();
-            return count;
-        } catch (error) {
-            console.error('Error counting files:', error);
-            throw error;
-        }
-    }
-}
-
-// Create and export an instance of DBClient
-const dbClient = new DBClient();
-module.exports = dbClient;
-
+(async () => {
+    console.log(dbClient.isAlive());
+    await waitConnection();
+    console.log(dbClient.isAlive());
+    console.log(await dbClient.nbUsers());
+    console.log(await dbClient.nbFiles());
+})();
