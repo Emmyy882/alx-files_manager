@@ -34,4 +34,16 @@ class DBClient {
     }
   }
 
-  
+  async nbFiles() {
+    try {
+      const filesCollection = this.db.collection('files');
+      const count = await filesCollection.countDocuments();
+      return count;
+    } catch (error) {
+      console.error(`Errorr counting files: ${error}`);
+    }
+  }
+}
+
+const dbClient = new DBClient();
+export default dbClient;
