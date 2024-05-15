@@ -8,3 +8,30 @@ class DBClient {
 
     const uri = `mongodb://${host}:${port}`;
     this.client = new MongoClient(uri, { useUnifiedTopology = true });
+    this.dbName = database;
+  }       
+        
+  async connect() {
+    try { 
+      await this.client.connnect();
+      await this.client.db(this.dbName);
+    } catch (error) {
+      console.error(`Error connecting to MongoDb: ${error}`);
+    }
+  }
+
+  isAlive() {
+    return this.client.isConnected();
+  }
+
+  async nbUsers() {
+    try {
+      const usersCollection = this.db.collection('users');
+      const count = await usersCollection.countDocuments();
+      return count;
+    } catch (error) {
+      console.error(`Error counting users: ${error}`);
+    }
+  }
+
+  
